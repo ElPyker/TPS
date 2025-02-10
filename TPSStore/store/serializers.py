@@ -84,10 +84,10 @@ class SessionSerializer(serializers.ModelSerializer):
 
 
     def get_player_name(self, obj):
-        return obj.player.nickname if obj.player else "uwu"
+        return obj.user.nickname if obj.user else "Desconocido"
 
     def get_account_name(self, obj):
-        return obj.account.name if obj.account else "uwu"
+        return obj.account.name if obj.account else "Desconocido"
 
 
 class SessionLogSerializer(serializers.ModelSerializer):
