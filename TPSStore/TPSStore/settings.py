@@ -27,6 +27,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # URL de Vite
+]
+
+CORS_ALLOW_CREDENTIALS = True  # Permite envío de cookies si es necesario
+
+AUTH_USER_MODEL = 'store.User'  # Asegúrate de que 'store' es el nombre correcto de tu app
 
 # Application definition
 
@@ -38,10 +45,34 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'store',
+    'rest_framework_simplejwt',
+    'corsheaders',  # Agregar corsheaders
+    'store',  # Tu aplicación
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',  # 🔹 Permite todas las solicitudes sin token (temporalmente)
+    ),
+}
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),  # 🔹 Access token válido por 30 días
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=90),  # 🔹 Refresh token válido por 90 días
+    'ROTATE_REFRESH_TOKENS': True,  # 🔹 Genera un nuevo refresh token cada vez que se use
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Habilitar CORS
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -50,6 +81,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'TPSStore.urls'
 
