@@ -70,7 +70,7 @@ class Item(models.Model):
 
 class Recipe(models.Model):
     """Modelo para almacenar recetas en ARK"""
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)  # 🔹 Permite recetas con el mismo nombre
     description = models.TextField(blank=True, null=True)
     output_item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="recipes")  # 🔹 Relaciona con Item
     output_quantity = models.PositiveIntegerField(default=1)  # 🔹 Cantidad producida (Ej: 1 Medical Brew por receta)
