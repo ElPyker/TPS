@@ -90,9 +90,6 @@ class TribeViewSet(viewsets.ModelViewSet):
     queryset = Tribe.objects.all()
     serializer_class = TribeSerializer
 
-class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all()
-    serializer_class = ItemSerializer
 
 class DinoViewSet(viewsets.ModelViewSet):
     queryset = Dino.objects.all()
@@ -202,9 +199,15 @@ class SessionLogViewSet(viewsets.ModelViewSet):
     queryset = SessionLog.objects.all()
     serializer_class = SessionLogSerializer
 
+class ItemViewSet(viewsets.ModelViewSet):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+
+
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+
 
 class RecipeIngredientViewSet(viewsets.ModelViewSet):
     queryset = RecipeIngredient.objects.all()

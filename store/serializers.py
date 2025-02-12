@@ -40,10 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_tribe_name(self, obj):
         return obj.tribe.name if obj.tribe else None  # 🔹 Si no tiene tribu, devuelve None
 
-class ItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Item
-        fields = '__all__'
+
 
 class DinoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -98,6 +95,12 @@ class SessionLogSerializer(serializers.ModelSerializer):
         model = SessionLog
         fields = '__all__'
 
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = '__all__'
+
+
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(source="item.name", read_only=True)
 
@@ -108,10 +111,11 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+    output_item_name = serializers.CharField(source="output_item.name", read_only=True)
 
     class Meta:
         model = Recipe
-        fields = ['id', 'name', 'description', 'output_quantity', 'ingredients']
+        fields = ['id', 'name', 'description', 'output_item', 'output_item_name', 'output_quantity', 'ingredients']
 
 
 class BlueprintMaterialSerializer(serializers.ModelSerializer):

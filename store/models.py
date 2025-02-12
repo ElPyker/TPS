@@ -59,25 +59,31 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
 class Item(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    stack = models.IntegerField(default=0)
-
-class Recipe(models.Model):
-    """ Modelo para almacenar recetas de comida en ARK """
+    """Modelo para almacenar los items (ingredientes y productos)"""
     name = models.CharField(max_length=100, unique=True)
-    description = models.TextField()
-    output_quantity = models.PositiveIntegerField(default=1)  # Cantidad producida
+    description = models.TextField(blank=True, null=True)
+    stack = models.PositiveIntegerField(default=1)  # Cantidad máxima de stack
 
     def __str__(self):
-        return self.name
+        return f"{self.name} (Stack: {self.stack})"
+
+
+class Recipe(models.Model):
+    """Modelo para almacenar recetas en ARK"""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+    output_item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="recipes")  # 🔹 Relaciona con Item
+    output_quantity = models.PositiveIntegerField(default=1)  # 🔹 Cantidad producida (Ej: 1 Medical Brew por receta)
+
+    def __str__(self):
+        return f"{self.name} (Produce: {self.output_quantity}x {self.output_item.name})"
 
 
 class RecipeIngredient(models.Model):
-    """ Modelo que relaciona los ingredientes con la receta """
+    """Modelo que relaciona ingredientes con una receta"""
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="ingredients")
-    item = models.ForeignKey("Item", on_delete=models.CASCADE)  # Usa el modelo Item ya creado
-    quantity = models.PositiveIntegerField()
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)  # 🔹 Usa el modelo Item ya creado
+    quantity = models.PositiveIntegerField()  # 🔹 Cantidad requerida por ingrediente
 
     def __str__(self):
         return f"{self.quantity}x {self.item.name} en {self.recipe.name}"
