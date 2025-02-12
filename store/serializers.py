@@ -103,10 +103,12 @@ class ItemSerializer(serializers.ModelSerializer):
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(source="item.name", read_only=True)
+    recipe_name = serializers.CharField(source="recipe.name", read_only=True)
 
     class Meta:
         model = RecipeIngredient
-        fields = ['item', 'item_name', 'quantity']
+        fields = ['id', 'recipe', 'recipe_name', 'item', 'item_name', 'quantity']
+
 
 
 class RecipeSerializer(serializers.ModelSerializer):

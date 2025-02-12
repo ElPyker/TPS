@@ -199,19 +199,20 @@ class SessionLogViewSet(viewsets.ModelViewSet):
     queryset = SessionLog.objects.all()
     serializer_class = SessionLogSerializer
 
-class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all()
-    serializer_class = ItemSerializer
-
-
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-
+    permission_classes = [AllowAny]  # 🔹 Permite acceso sin autenticación
 
 class RecipeIngredientViewSet(viewsets.ModelViewSet):
     queryset = RecipeIngredient.objects.all()
     serializer_class = RecipeIngredientSerializer
+    permission_classes = [AllowAny]  # 🔹 Permite acceso sin autenticación
+
+class ItemViewSet(viewsets.ModelViewSet):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+    permission_classes = [AllowAny]
 
 class BlueprintViewSet(viewsets.ModelViewSet):
     queryset = Blueprint.objects.all()
