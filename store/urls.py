@@ -3,10 +3,11 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     TribeViewSet, UserViewSet, ItemViewSet, DinoViewSet, GeneticViewSet, 
     ComboViewSet, ComboDetailViewSet, AccountViewSet, 
-    SessionViewSet, SessionLogViewSet, CustomTokenObtainPairView, RecipeViewSet, RecipeIngredientViewSet, BlueprintViewSet, BlueprintMaterialViewSet, get_current_user
+    SessionViewSet, SessionLogViewSet, CustomTokenObtainPairView, RecipeViewSet, RecipeIngredientViewSet, BlueprintViewSet, BlueprintMaterialViewSet, SalePostViewSet, get_current_user
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
+from django.conf.urls.static import static
+from django.conf import settings
 router = DefaultRouter()
 router.register(r'tribes', TribeViewSet)
 router.register(r'users', UserViewSet)
@@ -22,7 +23,7 @@ router.register(r'recipes', RecipeViewSet)
 router.register(r'recipe-ingredients', RecipeIngredientViewSet)
 router.register(r'blueprints', BlueprintViewSet)
 router.register(r'blueprint-materials', BlueprintMaterialViewSet)
-
+router.register(r'salepost', SalePostViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

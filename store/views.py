@@ -3,11 +3,11 @@ from rest_framework.views import APIView
 from django.utils.timezone import now
 from rest_framework import viewsets, status, serializers, permissions
 from rest_framework.response import Response
-from .models import Tribe, User, Item, Dino, Genetic, Combo, ComboDetail, Account, Session, SessionLog, Recipe, RecipeIngredient, Blueprint, BlueprintMaterial
+from .models import Tribe, User, Item, Dino, Genetic, Combo, ComboDetail, Account, Session, SessionLog, Recipe, RecipeIngredient, Blueprint, BlueprintMaterial, SalePost
 from .serializers import (
     TribeSerializer, UserSerializer, ItemSerializer, DinoSerializer, GeneticSerializer,
     ComboSerializer, ComboDetailSerializer, AccountSerializer,
-    SessionSerializer, SessionLogSerializer, RecipeSerializer, RecipeIngredientSerializer, BlueprintSerializer, BlueprintMaterialSerializer
+    SessionSerializer, SessionLogSerializer, RecipeSerializer, RecipeIngredientSerializer, BlueprintSerializer, BlueprintMaterialSerializer, SalePostSerializer
 )
 from rest_framework.decorators import action
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -17,6 +17,7 @@ from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import get_user_model
+import json
 
 User = get_user_model()
 
@@ -95,13 +96,55 @@ class DinoViewSet(viewsets.ModelViewSet):
     queryset = Dino.objects.all()
     serializer_class = DinoSerializer
 
+
 class GeneticViewSet(viewsets.ModelViewSet):
     queryset = Genetic.objects.all()
     serializer_class = GeneticSerializer
 
+
+    def perform_create(self, serializer):
+        """ 🔹 Asigna automáticamente la tribu del usuario autenticado """
+        serializer.save(tribe=self.request.user.tribe)
+
+
+class SalePostViewSet(viewsets.ModelViewSet):
+
+    queryset = SalePost.objects.all()
+    serializer_class = SalePostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        """ 🔹 Asigna automáticamente la tribu del usuario autenticado """
+        serializer.save(tribe=self.request.user.tribe)
+
+    def get_queryset(self):
+        """ 🔹 Filtra para que los usuarios solo puedan ver publicaciones disponibles """
+        return SalePost.objects.filter(is_for_sale=True)
+
 class ComboViewSet(viewsets.ModelViewSet):
     queryset = Combo.objects.all()
     serializer_class = ComboSerializer
+
+    def create(self, request, *args, **kwargs):
+        # ✅ Asegurarse de que los items en detalles y precios sean solo IDs
+        for detail in request.data.get("details", []):
+            if isinstance(detail.get("item"), dict):
+                detail["item"] = detail["item"].get("id")
+
+        for price in request.data.get("prices", []):
+            if price["type"] == "Item" and isinstance(price.get("item"), dict):
+                price["item"] = price["item"].get("id")
+
+        return super().create(request, *args, **kwargs)
+
+
+    def perform_create(self, serializer):
+        """ Asigna la tribu automáticamente al crear un combo """
+        serializer.save(tribe=self.request.user.tribe)
+
+
+
+
 
 class ComboDetailViewSet(viewsets.ModelViewSet):
     queryset = ComboDetail.objects.all()
@@ -207,15 +250,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class RecipeIngredientViewSet(viewsets.ModelViewSet):
     queryset = RecipeIngredient.objects.all()
     serializer_class = RecipeIngredientSerializer
-    permission_classes = [AllowAny]  # 🔹 Permite acceso sin autenticación
+
+    @action(detail=False, methods=['delete'])
+    def delete_by_recipe(self, request):
+        """Elimina todos los ingredientes de una receta"""
+        recipe_id = request.query_params.get('recipe')
+        if not recipe_id:
+            return Response({"error": "Se requiere el parámetro 'recipe'."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        ingredients_deleted, _ = RecipeIngredient.objects.filter(recipe_id=recipe_id).delete()
+        return Response({"message": f"{ingredients_deleted} ingredientes eliminados."}, status=status.HTTP_204_NO_CONTENT)
 
 class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all()
+    queryset = Item.objects.all().order_by('name')  # 🔹 Orden alfabético
     serializer_class = ItemSerializer
-    permission_classes = [AllowAny]
 
 class BlueprintViewSet(viewsets.ModelViewSet):
-    queryset = Blueprint.objects.all()
+    queryset = Blueprint.objects.all().order_by("output_item__name")
     serializer_class = BlueprintSerializer
 
 class BlueprintMaterialViewSet(viewsets.ModelViewSet):
